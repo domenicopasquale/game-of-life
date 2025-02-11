@@ -1,60 +1,89 @@
-# macOS specific
-._*
-.DS_Store
-.AppleDouble
-.LSOverride
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
 
-# Ruby on Rails
+# Testing
+/coverage
+
+# Production
+/build
+
+# Ruby/Rails
 *.rbc
 capybara-*.html
 .rspec
-/backend/db/*.sqlite3
-/backend/db/*.sqlite3-journal
-/backend/db/*.sqlite3-[0-9]*
-/backend/public/system
-/backend/coverage/
-/backend/spec/tmp
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/public/system
+/coverage/
+/spec/tmp
 *.orig
-/backend/rerun.txt
-/backend/pickle-email-*.html
+rerun.txt
+pickle-email-*.html
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.byebug_history
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# macOS specific
+.AppleDouble
+.LSOverride
 
 # Ignore all logfiles and tempfiles.
-/backend/log/*
-/backend/tmp/*
-!/backend/log/.keep
-!/backend/tmp/.keep
-
-# TODO Comment out this rule if you are OK with secrets being uploaded to the repo
-/backend/config/initializers/secret_token.rb
-/backend/config/master.key
-/backend/config/credentials/*.key
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
 
 # Environment normalization:
-/backend/.bundle
-/backend/vendor/bundle
-/backend/lib/bundler/man
+.bundle
+/vendor/bundle
+/lib/bundler/man
 
 # Ignore precompiled javascript packs
-/backend/public/packs
-/backend/public/packs-test
-/backend/public/assets
+/public/packs
+/public/packs-test
+/public/assets
 
 # Ignore uploaded files in development
-/backend/storage/*
-!/backend/storage/.keep
-/backend/public/uploads
+/storage/*
+!/storage/.keep
+/public/uploads
 
 # React / Node
 # dependencies
-/frontend/node_modules
-/frontend/.pnp
-/frontend/.pnp.js
+/node_modules
+/pnp
+/pnp.js
 
 # testing
-/frontend/coverage
+/coverage
 
 # production
-/frontend/build
+/build
 
 # misc
 .env.local
