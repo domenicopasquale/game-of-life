@@ -1,0 +1,46 @@
+source "https://rubygems.org"
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+ruby "3.2.2"
+
+# Core
+gem "rails", "~> 7.1.0"
+gem "pg", "~> 1.1"
+gem "puma", "~> 6.0"
+
+# API e Autenticazione
+gem 'graphql', '~> 2.0'
+gem 'devise', '~> 4.9'
+gem 'devise-jwt', '~> 0.11.0'
+gem 'rack-cors'
+gem 'jsonapi-serializer'
+
+# Asset Pipeline
+gem 'propshaft'
+gem 'bootsnap', require: false
+
+# Development tools
+group :development do
+  gem 'graphiql-rails'
+end
+
+# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
+# gem "jbuilder"
+
+# Use Redis adapter to run Action Cable in production
+# gem "redis", "~> 4.0"
+
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
+
+# Reduces boot times through caching; required in config/boot.rb
+# gem 'sprockets-rails'
+# gem 'sass-rails'
+
+group :development, :test do
+  gem "debug", platforms: %i[ mri mingw x64_mingw ]
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'faker'
+end
+
