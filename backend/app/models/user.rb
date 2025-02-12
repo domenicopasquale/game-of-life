@@ -8,6 +8,11 @@ class User < ApplicationRecord
          :jwt_authenticatable, jwt_revocation_strategy: self
 
   has_many :grids
+  has_many :games, dependent: :destroy
+
+  validates :email, presence: true, uniqueness: true
+  validates :password, presence: true, on: :create
+  validates :password_confirmation, presence: true, on: :create
 
   def generate_jwt
     JWT.encode(

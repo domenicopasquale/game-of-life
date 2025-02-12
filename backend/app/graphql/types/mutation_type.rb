@@ -14,5 +14,9 @@ module Types
     field :next_generation, mutation: Mutations::NextGeneration
     field :create_user, mutation: Mutations::CreateUser
     field :sign_in_user, mutation: Mutations::SignInUser
+    field :create_game, mutation: Mutations::CreateGame
+    field :update_game, mutation: Mutations::UpdateGame
+    field :delete_game, mutation: Mutations::DeleteGame
+    field :import_game, mutation: Mutations::ImportGame
   end
 end

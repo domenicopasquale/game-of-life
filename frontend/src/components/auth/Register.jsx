@@ -21,7 +21,7 @@ function Register() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/graphql', {
+      const registerResponse = await fetch('http://localhost:3001/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,13 +47,44 @@ function Register() {
         }),
       });
 
-      const data = await response.json();
+      const registerData = await registerResponse.json();
 
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
+      if (registerData.errors) {
+        throw new Error(registerData.errors[0].message);
       }
 
-      navigate('/login');
+      const loginResponse = await fetch('http://localhost:3001/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `
+            mutation SignInUser($email: String!, $password: String!) {
+              signInUser(input: { email: $email, password: $password }) {
+                token
+                user {
+                  id
+                  email
+                }
+              }
+            }
+          `,
+          variables: {
+            email,
+            password,
+          },
+        }),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (loginData.errors) {
+        throw new Error(loginData.errors[0].message);
+      }
+
+      localStorage.setItem('token', loginData.data.signInUser.token);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed');
     } finally {

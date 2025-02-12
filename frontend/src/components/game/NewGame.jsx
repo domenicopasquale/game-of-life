@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 function NewGame() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [newGame, setNewGame] = useState({
     name: '',
     width: 20,
@@ -13,8 +15,57 @@ function NewGame() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implementare la creazione del gioco nel backend
-    navigate('/game', { state: newGame });
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:3001/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          query: `
+            mutation CreateGame($name: String!, $width: Int!, $height: Int!, $speed: Int!, $pattern: String) {
+              createGame(input: {
+                name: $name
+                width: $width
+                height: $height
+                speed: $speed
+                pattern: $pattern
+              }) {
+                id
+                name
+                width
+                height
+                speed
+                pattern
+              }
+            }
+          `,
+          variables: {
+            name: newGame.name,
+            width: parseInt(newGame.width),
+            height: parseInt(newGame.height),
+            speed: parseInt(newGame.speed),
+            pattern: newGame.pattern || null
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+
+      navigate('/game', { state: data.data.createGame });
+    } catch (err) {
+      setError(err.message || 'Failed to create game');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -33,6 +84,12 @@ function NewGame() {
         </h1>
         
         <div className="bg-white rounded-lg shadow-sm p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 text-red-800 rounded-lg">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -133,11 +190,14 @@ function NewGame() {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium 
-                  hover:bg-primary-700 transition-colors duration-200 
-                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                disabled={loading}
+                className={`px-4 py-2 rounded-lg font-medium text-white
+                  ${loading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-primary-600 hover:bg-primary-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                  }`}
               >
-                Create Game
+                {loading ? 'Creating...' : 'Create Game'}
               </button>
             </div>
           </form>

@@ -46,5 +46,18 @@ module Types
       return [] unless context[:current_user]
       context[:current_user].grids
     end
+
+    field :my_games, [Types::GameType], null: false do
+      description "Get all games for current user"
+      argument :limit, Integer, required: false, default_value: 50
+    end
+
+    def my_games(limit:)
+      check_authentication!
+      context[:current_user]
+        .games
+        .order(created_at: :desc)
+        .limit(limit)
+    end
   end
 end

@@ -6,6 +6,7 @@ import Dashboard from './components/game/Dashboard';
 import NewGame from './components/game/NewGame';
 import BaseLayout from './components/layout/BaseLayout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ImportGame from './components/game/ImportGame';
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Grid />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/import" 
+            element={
+              <ProtectedRoute>
+                <ImportGame />
               </ProtectedRoute>
             } 
           />

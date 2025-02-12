@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PATTERNS = {
   glider: [
@@ -26,18 +26,31 @@ const PATTERNS = {
 
 function Grid() {
   const location = useLocation();
-  const gameConfig = location.state || {
-    width: 20,
-    height: 20,
-    speed: 500,
-    pattern: ''
-  };
+  const navigate = useNavigate();
+  const gameConfig = location.state;
 
-  const [cells, setCells] = useState(
-    Array(gameConfig.height).fill().map(() => Array(gameConfig.width).fill(false))
-  );
+  // Verifica che abbiamo i dati del gioco
+  if (!gameConfig) {
+    navigate('/dashboard');
+    return null;
+  }
+
+  const [cells, setCells] = useState(() => {
+    if (gameConfig.initial_state) {
+      return gameConfig.initial_state;
+    }
+    return Array(gameConfig.height).fill().map(() => Array(gameConfig.width).fill(false));
+  });
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState(gameConfig.speed);
+  const [error, setError] = useState('');
+
+  // Applica il pattern iniziale se presente
+  useEffect(() => {
+    if (gameConfig.pattern && PATTERNS[gameConfig.pattern]) {
+      applyPattern(PATTERNS[gameConfig.pattern]);
+    }
+  }, [gameConfig.pattern]);
 
   const countNeighbors = useCallback((grid, x, y) => {
     let count = 0;
@@ -123,14 +136,68 @@ function Grid() {
     }
   };
 
+  const handleUpdateGame = async (updatedConfig) => {
+    try {
+      const response = await fetch('http://localhost:3001/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          query: `
+            mutation UpdateGame($id: ID!, $speed: Int!) {
+              updateGame(input: {
+                id: $id
+                speed: $speed
+              }) {
+                id
+                speed
+              }
+            }
+          `,
+          variables: {
+            id: gameConfig.id,
+            speed: parseInt(updatedConfig.speed)
+          }
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update game');
+    }
+  };
+
+  const handleSpeedChange = (e) => {
+    const newSpeed = Number(e.target.value);
+    setSpeed(newSpeed);
+    handleUpdateGame({ speed: newSpeed });
+  };
+
   return (
     <div className="min-h-[calc(100vh-80px)] bg-gray-50 p-8">
       <div className="max-w-fit mx-auto">
         <div className="bg-white rounded-lg shadow-sm p-8">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {gameConfig.name}
+            </h2>
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 text-red-800 rounded-lg">
+                {error}
+              </div>
+            )}
+          </div>
+
           <div className="mb-6 flex justify-center">
             <select
               onChange={handlePatternSelect}
-              defaultValue=""
+              defaultValue={gameConfig.pattern || ""}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                 bg-white"
@@ -204,7 +271,7 @@ function Grid() {
 
             <select
               value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
+              onChange={handleSpeedChange}
               className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700
                 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                 bg-white"
