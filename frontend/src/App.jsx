@@ -10,47 +10,57 @@ import ImportGame from './components/game/ImportGame';
 
 function App() {
   return (
-    <Router>
-      <BaseLayout>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/new-game" 
-            element={
-              <ProtectedRoute>
-                <NewGame />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/game" 
-            element={
-              <ProtectedRoute>
-                <Grid />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/import" 
-            element={
-              <ProtectedRoute>
-                <ImportGame />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-        </Routes>
-      </BaseLayout>
-    </Router>
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar con z-index più alto di tutti */}
+      <nav className="sticky top-0 z-[100] bg-white dark:bg-gray-800 shadow-sm">
+        {/* ... contenuto navbar ... */}
+      </nav>
+
+      {/* Contenuto principale */}
+      <main className="flex-1 relative">
+        <Router>
+          <BaseLayout>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/new-game" 
+                element={
+                  <ProtectedRoute>
+                    <NewGame />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/game" 
+                element={
+                  <ProtectedRoute>
+                    <Grid />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/import" 
+                element={
+                  <ProtectedRoute>
+                    <ImportGame />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+            </Routes>
+          </BaseLayout>
+        </Router>
+      </main>
+    </div>
   );
 }
 

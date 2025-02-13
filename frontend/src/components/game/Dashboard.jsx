@@ -27,7 +27,7 @@ function Dashboard() {
                   width
                   height
                   speed
-                  pattern
+                  initial_state
                   createdAt
                 }
               }

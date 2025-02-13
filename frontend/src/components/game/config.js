@@ -1,0 +1,7 @@
+export const SPEED_CONFIG = {
+  VERY_SLOW: 900,
+  SLOW: 700,
+  MEDIUM: 500,
+  FAST: 300,
+  VERY_FAST: 100
+}; 

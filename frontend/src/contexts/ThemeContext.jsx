@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { useUserPreferences } from '../hooks/useUserPreferences';
 
 const ThemeContext = createContext();
 
-// Aggiungiamo delle classi comuni per gli input
 const commonStyles = {
   input: `block w-full rounded-lg shadow-sm px-4 py-2.5 sm:text-sm
     transition-colors duration-75 border
@@ -15,31 +15,18 @@ const commonStyles = {
 };
 
 export function ThemeProvider({ children }) {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    return saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-  
-  const [cellColor, setCellColor] = useState(() => {
-    return localStorage.getItem('cellColor') || '#1f2937'; // default gray-800
-  });
-  
-  const [cellSize, setCellSize] = useState(() => {
-    return parseInt(localStorage.getItem('cellSize')) || 15;
-  });
+  const { isDarkMode, getCellSize, setPreference } = useUserPreferences();
+  const [isDark, setIsDark] = useState(isDarkMode);
+  const [cellSize, setCellSize] = useState(getCellSize);
 
   useEffect(() => {
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', isDark);
-  }, [isDark]);
+    setPreference('theme', isDark);
+  }, [isDark, setPreference]);
 
   useEffect(() => {
-    localStorage.setItem('cellColor', cellColor);
-  }, [cellColor]);
-
-  useEffect(() => {
-    localStorage.setItem('cellSize', cellSize.toString());
-  }, [cellSize]);
+    setPreference('cellSize', cellSize);
+  }, [cellSize, setPreference]);
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
@@ -47,8 +34,6 @@ export function ThemeProvider({ children }) {
     <ThemeContext.Provider value={{
       isDark,
       toggleTheme,
-      cellColor,
-      setCellColor,
       cellSize,
       setCellSize,
       styles: commonStyles
