@@ -4,7 +4,7 @@ function BaseLayout({ children }) {
   return (
     <>
       <Navbar />
-      <main className="pt-20">
+      <main className="pt-16">
         {children}
       </main>
     </>

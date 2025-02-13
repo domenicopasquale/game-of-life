@@ -1,3 +1,57 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+@layer base {
+  body {
+    @apply transition-colors duration-100;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  .input-base {
+    @apply block w-full rounded-md shadow-sm px-3 py-2 transition-colors duration-75
+      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+      dark:focus:ring-offset-dark-bg;
+  }
+
+  .input-light {
+    @apply bg-light-input border-light-border text-light-text-primary placeholder-light-text-muted;
+  }
+
+  .input-dark {
+    @apply bg-dark-input border-dark-border text-dark-text-primary placeholder-dark-text-muted;
+  }
+
+  .btn-base {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200
+      focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700
+      focus:ring-primary-500
+      dark:focus:ring-offset-dark-bg;
+  }
+
+  .card {
+    @apply rounded-lg shadow-sm transition-colors duration-75
+      bg-light-card dark:bg-dark-card;
+  }
+
+  .text-title {
+    @apply font-bold text-light-text-primary dark:text-dark-text-primary;
+  }
+
+  .text-body {
+    @apply text-light-text-secondary dark:text-dark-text-secondary;
+  }
+
+  .text-muted {
+    @apply text-light-text-muted dark:text-dark-text-muted;
+  }
+}

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,12 +56,12 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} flex flex-col justify-center py-12 sm:px-6 lg:px-8`}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 className={`mt-6 text-center text-3xl font-extrabold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           Sign in to your account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className={`mt-2 text-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           Or{' '}
           <Link
             to="/register"
@@ -71,80 +73,83 @@ function Login() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} py-8 px-4 shadow sm:rounded-lg sm:px-10`}>
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label 
                 htmlFor="email" 
-                className="block text-sm font-medium text-gray-700"
+                className={`block text-sm font-medium mb-1
+                  ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
               >
                 Email address
               </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 
-                    rounded-md shadow-sm placeholder-gray-400 
-                    focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`block w-full rounded-lg shadow-sm px-4 py-2.5 sm:text-sm
+                  transition-colors duration-75 border
+                  ${isDark 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-800 placeholder-gray-500'
+                  }
+                  focus:border-primary-500 focus:ring-1 focus:ring-primary-500`}
+                placeholder="Enter your email"
+              />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
+                className={`block text-sm font-medium mb-1
+                  ${isDark ? 'text-gray-200' : 'text-gray-700'}`}
               >
                 Password
               </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 
-                    rounded-md shadow-sm placeholder-gray-400 
-                    focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                />
-              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`block w-full rounded-lg shadow-sm px-4 py-2.5 sm:text-sm
+                  transition-colors duration-75 border
+                  ${isDark 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-800 placeholder-gray-500'
+                  }
+                  focus:border-primary-500 focus:ring-1 focus:ring-primary-500`}
+                placeholder="Enter your password"
+              />
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      {error}
-                    </h3>
-                  </div>
-                </div>
+              <div className={`rounded-lg p-4 text-sm
+                ${isDark 
+                  ? 'bg-red-900/50 text-red-200 border border-red-800'
+                  : 'bg-red-50 text-red-800'
+                }`}
+              >
+                {error}
               </div>
             )}
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent 
-                  rounded-md shadow-sm text-sm font-medium text-white 
-                  ${loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
-                  }`}
-              >
-                {loading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full flex justify-center py-2.5 px-4 border border-transparent 
+                rounded-lg shadow-sm text-sm font-medium text-white
+                transition-colors duration-150
+                ${loading 
+                  ? `${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-400'} cursor-not-allowed` 
+                  : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                }
+                ${isDark ? 'focus:ring-offset-gray-900' : ''}`}
+            >
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
           </form>
         </div>
       </div>
