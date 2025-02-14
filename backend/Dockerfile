@@ -15,25 +15,29 @@ RUN apt-get update -qq && \
 # Crea e imposta la directory di lavoro
 WORKDIR /app
 
+# Imposta l'ambiente di produzione
+ENV RAILS_ENV=production \
+    NODE_ENV=production \
+    RAILS_SERVE_STATIC_FILES=true \
+    RAILS_LOG_TO_STDOUT=true
+
 # Copia Gemfile e Gemfile.lock
 COPY Gemfile* ./
 
 # Installa le gemme
-RUN bundle install
+RUN bundle config set --local without 'development test' && \
+    bundle install
 
 # Copia il resto dell'applicazione
 COPY . .
-
-# Precompila gli assets
-RUN rails assets:precompile
 
 # Espone la porta 3000
 EXPOSE 3000
 
 # Script di entrypoint per gestire il database
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
+COPY bin/docker-entrypoint /usr/bin/
+RUN chmod +x /usr/bin/docker-entrypoint
+ENTRYPOINT ["docker-entrypoint"]
 
 # Avvia l'applicazione
 CMD ["rails", "server", "-b", "0.0.0.0"]
