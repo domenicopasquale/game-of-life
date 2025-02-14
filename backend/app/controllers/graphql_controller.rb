@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-class GraphqlController < ApplicationController
-  # Disabilitiamo CSRF per le richieste GraphQL
-  skip_before_action :verify_authenticity_token
-
+class GraphqlController < ActionController::API
   # If accessing from outside this domain, nullify the session
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
