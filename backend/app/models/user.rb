@@ -21,7 +21,7 @@ class User < ApplicationRecord
         exp: 60.days.from_now.to_i,
         jti: jti
       },
-      Rails.application.credentials.devise_jwt_secret_key
+      ENV.fetch('JWT_SECRET_KEY')
     )
   end
 end

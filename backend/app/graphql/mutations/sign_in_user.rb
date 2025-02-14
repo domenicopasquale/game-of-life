@@ -12,7 +12,7 @@ module Mutations
 
       if user.valid_password?(password)
         token = user.generate_jwt
-        Rails.logger.info "Generated token for user #{user.id}"  # Logging temporaneo
+        Rails.logger.info "Generated token: #{token}"
         { user: user, token: token }
       else
         raise GraphQL::ExecutionError, "Invalid credentials"

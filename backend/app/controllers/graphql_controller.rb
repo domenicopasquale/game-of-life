@@ -27,22 +27,22 @@ class GraphqlController < ActionController::API
 
   def current_user_from_token
     header = request.headers['Authorization']
-    Rails.logger.info "Auth Header: #{header}"  # Logging temporaneo
+    Rails.logger.info "Auth Header: #{header}"
     return nil if header.blank?
 
     token = header.split(' ').last
-    Rails.logger.info "Token: #{token}"  # Logging temporaneo
+    Rails.logger.info "Token: #{token}"
     return nil if token.blank?
 
     begin
-      secret_key = Rails.application.credentials.devise_jwt_secret_key
-      Rails.logger.info "Secret key: #{secret_key.present?}"  # Logging temporaneo
+      secret_key = ENV.fetch('JWT_SECRET_KEY')
+      Rails.logger.info "Secret key: #{!secret_key.nil?}"
       
       decoded = JWT.decode(token, secret_key)[0]
-      Rails.logger.info "Decoded token: #{decoded}"  # Logging temporaneo
+      Rails.logger.info "Decoded token: #{decoded}"
       User.find(decoded['id'])
     rescue JWT::DecodeError => e
-      Rails.logger.error "JWT Error: #{e.message}"  # Logging temporaneo
+      Rails.logger.error "JWT Error: #{e.message}"
       nil
     end
   end
