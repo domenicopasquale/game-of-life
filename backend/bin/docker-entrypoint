@@ -1,8 +1,17 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
-if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
-  ./bin/rails db:prepare
-fi
+# Rimuove un eventuale server.pid precedente
+rm -f /app/tmp/pids/server.pid
 
-exec "${@}"
+# Aspetta che il database sia pronto
+until pg_isready -h $POSTGRES_HOST -p 5432 -U postgres
+do
+  echo "Waiting for postgres..."
+  sleep 2
+done
+
+# Esegue le migrazioni
+bundle exec rails db:migrate
+
+# Esegue il comando passato al container
+exec "$@"

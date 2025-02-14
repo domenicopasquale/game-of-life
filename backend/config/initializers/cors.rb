@@ -7,10 +7,11 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins 'http://localhost:5173', 
-            'http://localhost:3000', 
-            'http://localhost:3001',
-            ENV['FRONTEND_URL'] # Vercel URL
+    if Rails.env.production?
+      origins '*'
+    else
+      origins 'http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001'
+    end
 
     resource '*',
       headers: :any,
