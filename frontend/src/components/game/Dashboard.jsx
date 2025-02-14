@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useConfig } from '../../hooks/useConfig';
 
 function Dashboard() {
   const { isDark } = useTheme();
   const navigate = useNavigate();
+  const { API_URL } = useConfig();
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -12,7 +14,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await fetch('http://localhost:3001/graphql', {
+        const response = await fetch(`${API_URL}/graphql`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -50,13 +52,13 @@ function Dashboard() {
     };
 
     fetchGames();
-  }, []);
+  }, [API_URL]);
 
   const handleDeleteGame = async (id) => {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
 
     try {
-      const response = await fetch('http://localhost:3001/graphql', {
+      const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

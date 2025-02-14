@@ -1,20 +1,13 @@
 import { useMemo } from 'react';
 
 const ENV = {
-  development: {
-    API_URL: 'http://localhost:3001',
-    STORAGE_KEY: 'game_of_life_dev_'
-  },
-  production: {
-    API_URL: import.meta.env.VITE_API_URL || 'https://api.gameoflife.com',
-    STORAGE_KEY: 'game_of_life_'
-  }
+  API_URL: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+  STORAGE_KEY: import.meta.env.MODE === 'production' ? 'game_of_life_' : 'game_of_life_dev_'
 };
 
 export const useConfig = () => {
   const config = useMemo(() => {
-    const environment = import.meta.env.MODE || 'development';
-    return ENV[environment];
+    return ENV;
   }, []);
 
   return config;

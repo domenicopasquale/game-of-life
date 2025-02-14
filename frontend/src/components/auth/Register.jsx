@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthLayout from './AuthLayout';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useConfig } from '../../hooks/useConfig';
 
 function Register() {
   const { isDark, styles } = useTheme();
   const navigate = useNavigate();
+  const { API_URL } = useConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
@@ -23,7 +25,7 @@ function Register() {
     setError('');
 
     try {
-      const registerResponse = await fetch('http://localhost:3001/graphql', {
+      const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,13 +51,13 @@ function Register() {
         }),
       });
 
-      const registerData = await registerResponse.json();
+      const registerData = await response.json();
 
       if (registerData.errors) {
         throw new Error(registerData.errors[0].message);
       }
 
-      const loginResponse = await fetch('http://localhost:3001/graphql', {
+      const loginResponse = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

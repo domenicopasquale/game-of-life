@@ -28,6 +28,7 @@ import { GridStats } from './components/GridStats';
 import { motion } from 'framer-motion';
 import { SpeedControl } from './components/SpeedControl';
 import { Tutorial } from './components/Tutorial';
+import { useConfig } from '../../hooks/useConfig';
 
 function Grid() {
   const location = useLocation();
@@ -40,6 +41,7 @@ function Grid() {
   const [population, setPopulation] = useState(0);
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [showTutorial, setShowTutorial] = useState(true);
+  const { API_URL } = useConfig();
 
   if (!gameConfig) {
     navigate('/dashboard');
@@ -145,7 +147,7 @@ function Grid() {
 
   const handleUpdateGame = async (updatedConfig) => {
     try {
-      const response = await fetch('http://localhost:3001/graphql', {
+      const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,7 +203,7 @@ function Grid() {
         row.map(cell => Boolean(cell))
       );
 
-      const response = await fetch('http://localhost:3001/graphql', {
+      const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -228,10 +230,6 @@ function Grid() {
           }
         }),
       });
-
-      if (!response.ok) {
-        throw new Error(`Network error: ${response.status} ${response.statusText}`);
-      }
 
       const { data, errors } = await response.json();
       

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useConfig } from '../../hooks/useConfig';
 
 function Login() {
   const navigate = useNavigate();
   const { isDark } = useTheme();
+  const { API_URL } = useConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ function Login() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/graphql', {
+      const response = await fetch(`${API_URL}/graphql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
