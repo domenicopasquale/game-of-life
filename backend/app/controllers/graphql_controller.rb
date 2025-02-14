@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-class GraphqlController < ActionController::API
+class GraphqlController < ApplicationController
+  # Disabilitiamo CSRF per le richieste GraphQL
+  skip_before_action :verify_authenticity_token
+
   # If accessing from outside this domain, nullify the session
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
@@ -9,13 +12,18 @@ class GraphqlController < ActionController::API
     query = params[:query]
     operation_name = params[:operationName]
     context = {
-      current_user: current_user_from_token
+      current_user: current_user_from_token,
     }
+    
+    Rails.logger.info("GraphQL Query: #{query}")
+    Rails.logger.info("GraphQL Variables: #{variables}")
+    
     result = BackendSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue StandardError => e
-    raise e unless Rails.env.development?
-    handle_error_in_development(e)
+    Rails.logger.error("GraphQL Error: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    render json: { errors: [{ message: e.message }] }, status: 500
   end
 
   private
@@ -40,14 +48,12 @@ class GraphqlController < ActionController::API
     case variables_param
     when String
       if variables_param.present?
-        JSON.parse(variables_param) || {}
+        JSON.parse(variables_param)
       else
         {}
       end
-    when Hash
+    when Hash, ActionController::Parameters
       variables_param
-    when ActionController::Parameters
-      variables_param.to_unsafe_hash # GraphQL-Ruby will validate name and type of incoming variables.
     when nil
       {}
     else
