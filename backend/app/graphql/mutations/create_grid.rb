@@ -7,8 +7,6 @@ module Mutations
     type Types::GridType
 
     def resolve(width:, height:, cells:)
-      authenticate_user!
-      
       Grid.create!(
         width: width,
         height: height,

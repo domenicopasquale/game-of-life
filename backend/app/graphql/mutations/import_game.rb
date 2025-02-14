@@ -1,5 +1,5 @@
 module Mutations
-  class ImportGame < BaseMutation
+  class ImportGame < BaseMutationWithAuth
     argument :file_content, String, required: true
     argument :name, String, required: true
 
@@ -7,8 +7,6 @@ module Mutations
     field :errors, [String], null: false
 
     def resolve(file_content:, name:)
-      check_authentication!
-      
       rows = file_content.split("\n").map do |row| 
         row.strip.split(',').map { |cell| cell.to_i == 1 }
       end

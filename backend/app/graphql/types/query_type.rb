@@ -31,33 +31,51 @@ module Types
     field :grid, Types::GridType, null: true do
       description "Get a specific grid by ID"
       argument :id, ID, required: true
+
+      def authorized?
+        return true if context[:current_user]
+        raise GraphQL::ExecutionError, "You need to authenticate to perform this action"
+      end
     end
 
     field :grids, [Types::GridType], null: false do
       description "Get all grids for current user"
+
+      def authorized?
+        return true if context[:current_user]
+        raise GraphQL::ExecutionError, "You need to authenticate to perform this action"
+      end
     end
 
     def grid(id:)
-      return nil unless context[:current_user]
       context[:current_user].grids.find_by(id: id)
     end
 
     def grids
-      return [] unless context[:current_user]
       context[:current_user].grids
     end
 
-    field :my_games, [Types::GameType], null: false do
+    field :my_games, [Types::GameType], null: false, requires_authentication: true do
       description "Get all games for current user"
       argument :limit, Integer, required: false, default_value: 50
     end
 
     def my_games(limit:)
-      check_authentication!
       context[:current_user]
         .games
         .order(created_at: :desc)
         .limit(limit)
+    end
+
+    field :games, [Types::GameType], null: false do
+      def authorized?
+        return true if context[:current_user]
+        raise GraphQL::ExecutionError, "You need to authenticate to perform this action"
+      end
+    end
+
+    def games
+      context[:current_user].games.order(created_at: :desc)
     end
   end
 end

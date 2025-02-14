@@ -1,5 +1,5 @@
 module Mutations
-  class CreateGame < BaseMutation
+  class CreateGame < BaseMutationWithAuth
     argument :name, String, required: true
     argument :width, Integer, required: true
     argument :height, Integer, required: true
@@ -9,8 +9,6 @@ module Mutations
     type Types::GameType
 
     def resolve(name:, width:, height:, speed:, pattern: nil)
-      check_authentication!
-
       current_user.games.create!(
         name: name,
         width: width,
