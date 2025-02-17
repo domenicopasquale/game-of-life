@@ -1,6 +1,6 @@
 module Mutations
   class BaseMutationWithAuth < BaseMutation
-    def ready?
+    def ready?(**args)
       Rails.logger.tagged("BaseMutationWithAuth#ready?") do
         Rails.logger.info "=== Auth Check Started ==="
         Rails.logger.info "Current user: #{context[:current_user].inspect}"
@@ -8,8 +8,7 @@ module Mutations
         Rails.logger.info "Headers: #{context[:headers]}" if context[:headers]
         Rails.logger.info "Request: #{context[:request]&.inspect}"
         Rails.logger.info "Environment: #{Rails.env}"
-        Rails.logger.info "Mutation Class: #{self.class.name}"
-        Rails.logger.info "Arguments: #{arguments.inspect}" if respond_to?(:arguments)
+        Rails.logger.info "Arguments: #{args.inspect}"
         
         unless context[:current_user]
           Rails.logger.error "Authentication failed - No current user"
@@ -31,8 +30,6 @@ module Mutations
         Rails.logger.error "Auth Error: #{e.class} - #{e.message}"
         Rails.logger.error "Backtrace:\n#{e.backtrace[0..5].join("\n")}"
         Rails.logger.error "Full context: #{context.to_h}"
-        Rails.logger.error "Mutation Class: #{self.class.name}"
-        Rails.logger.error "Arguments: #{arguments.inspect}" if respond_to?(:arguments)
         
         error_message = Rails.env.production? ? 
           "Si è verificato un errore durante l'elaborazione della richiesta" :
