@@ -1,22 +1,13 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   PlayIcon, 
   StopIcon, 
-  ForwardIcon, 
-  BoltIcon
+  ForwardIcon
 } from '@heroicons/react/24/solid';
 import { PiBroomBold } from 'react-icons/pi';
 import { useTheme } from '../../contexts/ThemeContext';
-import { 
-  CursorArrowRaysIcon, 
-  PlayCircleIcon,
-  CheckCircleIcon 
-} from '@heroicons/react/24/outline';
 import { FaFloppyDisk } from 'react-icons/fa6';
-import { useGameLogic } from '../../hooks/useGameLogic';
-import { useGameAPI } from '../../hooks/useGameAPI';
-import { useGameEvents } from '../../hooks/useGameEvents';
 import { useNotifications } from '../../hooks/useNotifications';
 import { useZoom } from '../../hooks/useZoom';
 import { useKeyboardControls } from '../../hooks/useKeyboardControls';
@@ -25,10 +16,10 @@ import { AnimatePresence } from 'framer-motion';
 import { PatternSelector } from './components/PatternSelector';
 import { ZoomControls } from './components/ZoomControls';
 import { GridStats } from './components/GridStats';
-import { motion } from 'framer-motion';
 import { SpeedControl } from './components/SpeedControl';
 import { Tutorial } from './components/Tutorial';
 import { useConfig } from '../../hooks/useConfig';
+import { formatSpeed, SPEED_VALUES } from '../../utils/speed';
 
 function Grid() {
   const location = useLocation();
@@ -42,6 +33,29 @@ function Grid() {
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [showTutorial, setShowTutorial] = useState(true);
   const { API_URL } = useConfig();
+  const [isStopDebounced, setIsStopDebounced] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const lastUpdateRef = useRef(0);
+  const requestIdRef = useRef(null);
+  const [speed, setSpeed] = useState(() => {
+    if (!SPEED_VALUES.includes(gameConfig.speed)) {
+      return SPEED_VALUES.reduce((prev, curr) => {
+        return Math.abs(curr - gameConfig.speed) < Math.abs(prev - gameConfig.speed) 
+          ? curr 
+          : prev;
+      });
+    }
+    return gameConfig.speed;
+  });
+  const intervalRef = useRef(null);
+  const updateSpeedTimeoutRef = useRef(null);
+  const pendingUpdatesRef = useRef(null);
+  const gameStateRef = useRef({
+    isRunning: false,
+    speed: gameConfig.speed,
+    lastUpdate: 0,
+    animationFrameId: null
+  });
 
   if (!gameConfig) {
     navigate('/dashboard');
@@ -54,8 +68,8 @@ function Grid() {
     }
     return Array(gameConfig.height).fill().map(() => Array(gameConfig.width).fill(false));
   });
-  const [isRunning, setIsRunning] = useState(false);
-  const [speed, setSpeed] = useState(gameConfig.speed);
+  const [animationFrameId, setAnimationFrameId] = useState(null);
+  const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
   const countNeighbors = useCallback((grid, x, y) => {
     return [-1, 0, 1].reduce((count, i) => 
@@ -122,17 +136,47 @@ function Grid() {
     setPopulation(pattern.flat().filter(Boolean).length);
   }, [isRunning, gameConfig.height, gameConfig.width]);
 
-  useEffect(() => {
-    let intervalId;
-    if (isRunning) {
-      intervalId = setInterval(calculateNextGeneration, speed);
+  const gameLoop = useCallback((timestamp) => {
+    if (!gameStateRef.current.isRunning) return;
+
+    if (!gameStateRef.current.lastUpdate) {
+      gameStateRef.current.lastUpdate = timestamp;
     }
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
-  }, [isRunning, calculateNextGeneration, speed]);
+
+    const elapsed = timestamp - gameStateRef.current.lastUpdate;
+
+    if (elapsed >= gameStateRef.current.speed) {
+      calculateNextGeneration();
+      gameStateRef.current.lastUpdate = timestamp;
+    }
+
+    gameStateRef.current.animationFrameId = requestAnimationFrame(gameLoop);
+  }, [calculateNextGeneration]);
+
+  const handleStart = useCallback(() => {
+    gameStateRef.current.isRunning = true;
+    setIsRunning(true);
+    gameStateRef.current.animationFrameId = requestAnimationFrame(gameLoop);
+  }, [gameLoop]);
+
+  const handleStop = useCallback(() => {
+    gameStateRef.current.isRunning = false;
+    if (gameStateRef.current.animationFrameId) {
+      cancelAnimationFrame(gameStateRef.current.animationFrameId);
+      gameStateRef.current.animationFrameId = null;
+    }
+    gameStateRef.current.lastUpdate = 0;
+    setIsRunning(false);
+  }, []);
+
+  const handleSpeedChange = useCallback((newSpeed) => {
+    gameStateRef.current.speed = newSpeed;
+    setSpeed(newSpeed);
+    
+    if (!gameStateRef.current.isRunning) {
+      handleUpdateGame({ speed: newSpeed });
+    }
+  }, []);
 
   const toggleCell = (row, col) => {
     if (!isRunning) {
@@ -186,11 +230,6 @@ function Grid() {
     } catch (err) {
       showError(err.message || 'Failed to update game');
     }
-  };
-
-  const handleSpeedChange = (newSpeed) => {
-    setSpeed(newSpeed);
-    handleUpdateGame({ speed: newSpeed });
   };
 
   const isGridEmpty = useCallback(() => {
@@ -309,12 +348,21 @@ function Grid() {
   }, [handleZoomOut, setCellSize]);
 
   useKeyboardControls({
-    onPlay: () => setIsRunning(prev => !prev),
+    onPlay: () => isRunning ? handleStop() : handleStart(),
     onStep: calculateNextGeneration,
     onClear: resetGrid,
     onZoomIn,
     onZoomOut
   });
+
+  useEffect(() => {
+    return () => {
+      if (gameStateRef.current.animationFrameId) {
+        cancelAnimationFrame(gameStateRef.current.animationFrameId);
+      }
+      gameStateRef.current.isRunning = false;
+    };
+  }, []);
 
   return (
     <div className={`min-h-[calc(100vh-64px)] ${isDark ? 'bg-gray-900' : 'bg-gray-50'} p-2`}>
@@ -355,7 +403,7 @@ function Grid() {
             >
               <div className="flex items-center gap-1">
                 <ControlButton
-                  onClick={() => setIsRunning(!isRunning)}
+                  onClick={isRunning ? handleStop : handleStart}
                   className="p-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                   title={isRunning ? 'Stop' : 'Start'}
                 >

@@ -18,6 +18,10 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# Carica le variabili d'ambiente prima di tutto
+require 'dotenv'
+Dotenv.load
+
 module Backend
   class Application < Rails::Application
     config.active_record.query_log_tags_enabled = true

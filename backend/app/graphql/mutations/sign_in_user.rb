@@ -8,14 +8,20 @@ module Mutations
 
     def resolve(email:, password:)
       user = User.find_for_authentication(email: email)
-      return { user: nil, token: nil } unless user
-
-      if user.valid_password?(password)
-        token = user.generate_jwt
-        Rails.logger.info "Generated token: #{token}"
-        { user: user, token: token }
+      
+      if user&.valid_password?(password)
+        {
+          token: user.generate_jwt,
+          user: user
+        }
       else
-        raise GraphQL::ExecutionError, "Invalid credentials"
+        raise GraphQL::ExecutionError.new(
+          "Invalid credentials",
+          extensions: {
+            code: 'AUTHENTICATION_ERROR',
+            detailed_message: 'Incorrect email or password'
+          }
+        )
       end
     end
   end

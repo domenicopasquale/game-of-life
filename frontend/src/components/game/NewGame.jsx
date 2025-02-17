@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BoltIcon } from '@heroicons/react/24/solid';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useConfig } from '../../hooks/useConfig';
+import { SPEEDS, formatSpeed, SPEED_VALUES } from '../../utils/speed';
 
 function NewGame() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ function NewGame() {
     name: '',
     width: 20,
     height: 20,
-    speed: 500
+    speed: SPEEDS.SPEED_1X
   });
 
   const handleSubmit = async (e) => {
@@ -75,6 +76,22 @@ function NewGame() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleSpeedChange = (value) => {
+    handleChange({
+      target: {
+        name: 'speed',
+        value: Number(value)
+      }
+    });
+  };
+
+  const getSpeedColor = (speed) => {
+    const multiplier = 1000 / speed;
+    if (multiplier <= 3) return 'text-red-500';    // 1x-3x
+    if (multiplier <= 6) return 'text-green-500';  // 4x-6x
+    return 'text-blue-500';                        // 7x-10x
   };
 
   return (
@@ -154,7 +171,7 @@ function NewGame() {
 
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Speed
+                Speed: {formatSpeed(newGame.speed)}
               </label>
               <div className={`flex items-center gap-2 mt-1 p-2 rounded-lg border
                 ${isDark 
@@ -162,26 +179,13 @@ function NewGame() {
                   : 'bg-white border-gray-300'
                 }`}
               >
-                <BoltIcon className={`w-5 h-5 ${
-                  newGame.speed >= 900 ? 'text-blue-500' :
-                  newGame.speed >= 700 ? 'text-violet-500' :
-                  newGame.speed >= 500 ? 'text-green-500' :
-                  newGame.speed >= 300 ? 'text-yellow-500' :
-                  newGame.speed >= 200 ? 'text-orange-500' :
-                  'text-red-500'
-                }`} />
+                <BoltIcon className={`w-5 h-5 ${getSpeedColor(newGame.speed)}`} />
                 <input
                   type="range"
-                  min="100"
-                  max="1000"
-                  step="100"
-                  value={1100 - newGame.speed}
-                  onChange={(e) => handleChange({
-                    target: {
-                      name: 'speed',
-                      value: 1100 - Number(e.target.value)
-                    }
-                  })}
+                  min="0"
+                  max="9"
+                  value={SPEED_VALUES.indexOf(newGame.speed)}
+                  onChange={(e) => handleSpeedChange(SPEED_VALUES[e.target.value])}
                   className={`w-full h-2 rounded-lg appearance-none cursor-pointer
                     ${isDark ? 'bg-gray-700' : 'bg-gray-200'}
                     [&::-webkit-slider-thumb]:appearance-none
@@ -190,14 +194,12 @@ function NewGame() {
                     [&::-webkit-slider-thumb]:rounded-full
                     [&::-webkit-slider-thumb]:bg-primary-600
                     [&::-webkit-slider-thumb]:hover:bg-primary-700`}
-                  title={`Speed: ${
-                    newGame.speed >= 900 ? 'Very Slow' :
-                    newGame.speed >= 700 ? 'Slow' :
-                    newGame.speed >= 500 ? 'Medium' :
-                    newGame.speed >= 300 ? 'Fast' :
-                    'Very Fast'
-                  } (${newGame.speed}ms)`}
                 />
+              </div>
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>1x</span>
+                <span>5x</span>
+                <span>10x</span>
               </div>
             </div>
 

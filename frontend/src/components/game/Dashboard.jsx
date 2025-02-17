@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useConfig } from '../../hooks/useConfig';
+import { formatSpeed } from '../../utils/speed';
 
 function Dashboard() {
   const { isDark } = useTheme();
@@ -185,7 +186,7 @@ function Dashboard() {
                     Grid: {game.width}x{game.height}
                   </p>
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Speed: {game.speed === 1000 ? 'Slow' : game.speed === 500 ? 'Medium' : 'Fast'}
+                    Speed: {formatSpeed(game.speed)}
                   </p>
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                     Created: {new Date(game.createdAt).toLocaleDateString()}

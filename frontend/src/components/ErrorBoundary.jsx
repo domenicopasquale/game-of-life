@@ -9,7 +9,8 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="text-center py-12">
-          <h2 className="text-xl font-bold text-red-600">Something went wrong</h2>
+          <h1>Something went wrong.</h1>
+          <p>An unexpected error occurred.</p>
           <button 
             onClick={() => window.location.reload()}
             className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg"

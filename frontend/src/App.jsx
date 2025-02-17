@@ -11,12 +11,12 @@ import ImportGame from './components/game/ImportGame';
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Navbar con z-index più alto di tutti */}
+      {/* Navbar with highest z-index */}
       <nav className="sticky top-0 z-[100] bg-white dark:bg-gray-800 shadow-sm">
-        {/* ... contenuto navbar ... */}
+        {/* ... navbar content ... */}
       </nav>
 
-      {/* Contenuto principale */}
+      {/* Main content */}
       <main className="flex-1 relative">
         <Router>
           <BaseLayout>

@@ -7,22 +7,64 @@ function ImportGame() {
   const { isDark } = useTheme();
   const { API_URL } = useConfig();
   const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
   const navigate = useNavigate();
 
+  const handleFile = (file) => {
+    if (!file.name.endsWith('.csv')) {
+      setError('Please upload a CSV file');
+      return;
+    }
+
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      setFile(content);
+      setError('');
+    };
+    reader.readAsText(file);
+  };
+
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => setFile(e.target.result);
-      reader.readAsText(file);
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      handleFile(selectedFile);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile) {
+      handleFile(droppedFile);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!file) {
+      setError('Please select a file to import');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -62,13 +104,14 @@ function ImportGame() {
       const data = await response.json();
       if (data.errors) throw new Error(data.errors[0].message);
       
-      if (data.data.importGame.errors?.length > 0) {
-        throw new Error(data.data.importGame.errors[0]);
+      const result = data.data.importGame;
+      if (result.errors?.length) {
+        throw new Error(result.errors[0]);
       }
       
-      navigate('/game', { state: data.data.importGame.game });
+      navigate('/game', { state: result.game });
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error during import');
     } finally {
       setLoading(false);
     }
@@ -91,6 +134,7 @@ function ImportGame() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                placeholder="Enter game name"
                 className={`mt-1 block w-full rounded-md shadow-sm px-3 py-2 
                   ${isDark 
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
@@ -103,51 +147,76 @@ function ImportGame() {
 
             <div>
               <label className={`block text-sm font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
-                Game File (CSV)
+                CSV File
               </label>
-              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md
-                ${isDark 
-                  ? 'border-gray-600 hover:border-gray-500' 
-                  : 'border-gray-300 hover:border-gray-400'
-                }`}
+              <div
+                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md
+                  ${isDragging ? 'border-primary-500 bg-primary-50' : ''}
+                  ${isDark 
+                    ? 'border-gray-600 hover:border-gray-500' 
+                    : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
                 <div className="space-y-1 text-center">
-                  <svg
-                    className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex text-sm text-center justify-center">
-                    <label
-                      htmlFor="file-upload"
-                      className={`relative cursor-pointer rounded-md font-medium 
-                        ${isDark ? 'text-primary-400' : 'text-primary-600'} 
-                        hover:text-primary-500 focus-within:outline-none`}
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        accept=".csv,.txt"
-                        onChange={handleFileChange}
-                        className="sr-only"
-                        required
-                      />
-                    </label>
-                  </div>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                    File should contain 0s and 1s separated by commas
-                  </p>
+                  {fileName ? (
+                    <div className="flex flex-col items-center">
+                      <span className={`text-sm ${isDark ? 'text-gray-200' : 'text-gray-600'}`}>
+                        File uploaded: {fileName}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFileName('');
+                          setFile(null);
+                        }}
+                        className="mt-2 text-sm text-red-600 hover:text-red-800"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <svg
+                        className={`mx-auto h-12 w-12 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <div className="flex text-sm text-center justify-center">
+                        <label
+                          htmlFor="file-upload"
+                          className={`relative cursor-pointer rounded-md font-medium 
+                            ${isDark ? 'text-primary-400' : 'text-primary-600'} 
+                            hover:text-primary-500 focus-within:outline-none`}
+                        >
+                          <span>Upload a file</span>
+                          <input
+                            id="file-upload"
+                            name="file-upload"
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileChange}
+                            className="sr-only"
+                            required
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        CSV file with 0s and 1s separated by commas
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
