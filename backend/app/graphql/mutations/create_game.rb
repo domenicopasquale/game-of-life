@@ -37,6 +37,16 @@ module Mutations
           }
         )
       end
+    rescue StandardError => e
+      Rails.logger.error "Create Game Error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      raise GraphQL::ExecutionError.new(
+        "Si è verificato un errore durante la creazione del gioco",
+        extensions: {
+          code: 'CREATE_ERROR',
+          detailed_message: e.message
+        }
+      )
     end
   end
 end 

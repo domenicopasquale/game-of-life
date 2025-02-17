@@ -34,7 +34,7 @@ class Game < ApplicationRecord
     
     # Converti esplicitamente i valori in booleani
     self.initial_state = initial_state.map do |row|
-      row.map { |cell| !!cell } # Doppia negazione per assicurare valori booleani
+      row.map { |cell| !!cell }
     end
   end
 end 
