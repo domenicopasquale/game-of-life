@@ -1,43 +1,48 @@
 module Mutations
   class ImportGame < BaseMutationWithAuth
+    field :game, Types::GameType, null: true
+    field :errors, [String], null: true
+
     argument :file_content, String, required: true
     argument :name, String, required: true
 
-    field :game, Types::GameType, null: true
-    field :errors, [String], null: false
-
     def resolve(file_content:, name:)
-      rows = file_content.split("\n").map do |row| 
-        row.strip.split(',').map { |cell| cell.to_i == 1 }
+      # Parse il contenuto del file CSV
+      rows = file_content.split("\n").map { |row| row.split(',').map(&:strip) }
+      
+      width = rows.first&.length || 0
+      height = rows.length
+      
+      # Converti la griglia in array di booleani
+      initial_state = rows.map do |row|
+        row.map { |cell| cell.to_i == 1 }
       end
-      
-      raise GraphQL::ExecutionError, "Invalid file format" unless valid_format?(rows)
-      
-      game = current_user.games.create!(
+
+      game = Game.new(
+        user: current_user,
         name: name,
-        width: rows.first.length,
-        height: rows.length,
-        speed: 500,
-        initial_state: rows  # Assicuriamoci che sia un array di array di booleani
+        width: width,
+        height: height,
+        speed: 500, # Valore di default
+        initial_state: initial_state
       )
 
-      {
-        game: game,
-        errors: []
-      }
-    rescue => e
+      if game.save
+        {
+          game: game,
+          errors: []
+        }
+      else
+        {
+          game: nil,
+          errors: game.errors.full_messages
+        }
+      end
+    rescue StandardError => e
       {
         game: nil,
         errors: [e.message]
       }
-    end
-
-    private
-
-    def valid_format?(rows)
-      return false if rows.empty?
-      width = rows.first.length
-      rows.all? { |row| row.length == width }
     end
   end
 end 
