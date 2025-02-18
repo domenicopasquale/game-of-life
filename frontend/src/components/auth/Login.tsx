@@ -5,6 +5,7 @@ import { SIGN_IN_USER } from '../../graphql/mutations';
 import { useTheme } from '../../contexts/ThemeContext';
 import { darkTheme, lightTheme } from '../../utils/theme';
 import { motion } from 'framer-motion';
+import { client } from '../../apollo/client';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -16,11 +17,22 @@ const Login: React.FC = () => {
 
   const [signIn, { loading }] = useMutation(SIGN_IN_USER, {
     onCompleted: (data) => {
-      localStorage.setItem('token', data.signInUser.token);
-      navigate('/dashboard');
+      try {
+        localStorage.setItem('token', data.signInUser.token);
+        client.resetStore().then(() => {
+          navigate('/dashboard');
+        }).catch(error => {
+          console.error('Error resetting store:', error);
+          setError('Error during login process. Please try again.');
+        });
+      } catch (err) {
+        console.error('Error in onCompleted:', err);
+        setError('Error saving authentication data');
+      }
     },
     onError: (error) => {
-      setError(error.message);
+      console.error('SignIn mutation error:', error);
+      setError(error.message || 'An error occurred during sign in');
     }
   });
 
@@ -28,12 +40,18 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError('');
     
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+    
     try {
       await signIn({
         variables: { email, password }
       });
     } catch (err) {
       console.error('Login error:', err);
+      setError('An unexpected error occurred');
     }
   };
 
