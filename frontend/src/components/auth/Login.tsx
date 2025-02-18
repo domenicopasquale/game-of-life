@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { darkTheme, lightTheme } from '../../utils/theme';
 import { motion } from 'framer-motion';
 import { client } from '../../apollo/client';
+import Spinner from '../common/Spinner';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -14,27 +15,40 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const [signIn, { loading }] = useMutation(SIGN_IN_USER, {
-    onCompleted: (data) => {
+    onCompleted: async (data) => {
       try {
         localStorage.setItem('token', data.signInUser.token);
-        client.resetStore().then(() => {
-          navigate('/dashboard');
-        }).catch(error => {
-          console.error('Error resetting store:', error);
-          setError('Error during login process. Please try again.');
-        });
+        
+        // Impostiamo un flag per evitare doppi reindirizzamenti
+        setIsRedirecting(true);
+        
+        // Resettiamo lo store Apollo prima di navigare
+        await client.clearStore();
+        
+        // Aggiungiamo un piccolo delay per assicurarci che lo store sia resettato
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100);
       } catch (err) {
-        console.error('Error in onCompleted:', err);
-        setError('Error saving authentication data');
+        console.error('Error in login completion:', err);
+        setError('Error during login process');
+        setIsRedirecting(false);
       }
     },
     onError: (error) => {
-      console.error('SignIn mutation error:', error);
+      console.error('Login error:', error);
       setError(error.message || 'An error occurred during sign in');
+      setIsRedirecting(false);
     }
   });
+
+  // Preveniamo la navigazione se c'è già un reindirizzamento in corso
+  if (isRedirecting) {
+    return <Spinner fullScreen message="Accessing your account..." />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

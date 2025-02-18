@@ -8,8 +8,30 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import ImportGame from './components/game/ImportGame';
 import ErrorBoundary from './components/ErrorBoundary';
 import GridWrapper from './components/game/GridWrapper';
+import { useEffect, useState } from 'react';
+import client from './utils/apolloClient';
+import Spinner from './components/common/Spinner';
 
 const App: React.FC = () => {
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        await client.resetStore();
+      } catch (error) {
+        console.error('Error initializing app:', error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  if (!isInitialized) {
+    return <Spinner fullScreen />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
