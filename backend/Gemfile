@@ -14,6 +14,7 @@ gem 'devise', '~> 4.9'
 gem 'devise-jwt', '~> 0.11.0'
 gem 'rack-cors'
 gem 'jsonapi-serializer'
+gem 'dotenv-rails'
 
 # Asset Pipeline
 gem 'propshaft'
@@ -42,7 +43,6 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'factory_bot_rails'
   gem 'faker'
-  gem 'dotenv-rails'
 end
 
 group :production do
