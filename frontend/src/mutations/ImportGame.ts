@@ -1,14 +1,16 @@
 import { gql } from '@apollo/client';
 
 export const IMPORT_GAME = gql`
-  mutation ImportGame($name: String!, $fileContent: String!) {
-    importGame(input: { name: $name, fileContent: $fileContent }) {
+  mutation ImportGame($name: String!, $file_content: String!) {
+    importGame(input: {
+      name: $name,
+      fileContent: $file_content
+    }) {
       game {
         id
         name
         width
         height
-        speed
         initial_state
       }
       errors
