@@ -1,5 +1,4 @@
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useUserPreferences } from '../hooks/useUserPreferences';
+import React, { createContext, useContext, useState } from 'react';
 
 interface ThemeContextType {
   isDark: boolean;
@@ -10,36 +9,21 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface ThemeProviderProps {
-  children: ReactNode;
-}
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isDark, setIsDark] = useState(() => {
+    const stored = localStorage.getItem('theme');
+    return stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const { preferences, setPreferences } = useUserPreferences();
+  const [cellSize, setCellSize] = useState(20);
 
   const toggleTheme = () => {
-    setPreferences(prev => ({
-      ...prev,
-      isDark: !prev.isDark
-    }));
-  };
-
-  const setCellSize = (size: number) => {
-    setPreferences(prev => ({
-      ...prev,
-      cellSize: size
-    }));
-  };
-
-  const value = {
-    isDark: preferences.isDark,
-    toggleTheme,
-    cellSize: preferences.cellSize,
-    setCellSize
+    setIsDark(!isDark);
+    localStorage.setItem('theme', !isDark ? 'dark' : 'light');
   };
 
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme, cellSize, setCellSize }}>
       {children}
     </ThemeContext.Provider>
   );

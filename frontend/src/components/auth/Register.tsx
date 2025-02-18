@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import { CREATE_USER } from '../../mutations/CreateUser';
+import { CREATE_USER } from '../../graphql/mutations';
 import { useTheme } from '../../contexts/ThemeContext';
 import { darkTheme, lightTheme } from '../../utils/theme';
 import { motion } from 'framer-motion';
@@ -36,7 +36,11 @@ const Register: React.FC = () => {
     
     try {
       await createUser({
-        variables: { email, password, passwordConfirmation }
+        variables: { 
+          email, 
+          password,
+          passwordConfirmation
+        }
       });
     } catch (err) {
       console.error('Registration error:', err);

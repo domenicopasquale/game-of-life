@@ -7,8 +7,8 @@ import {
   ArrowUpTrayIcon 
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../../contexts/ThemeContext';
-import { GET_GAMES } from '../../queries/GetGames';
-import { DELETE_GAME } from '../../mutations/DeleteGame';
+import { GET_GAMES } from '../../graphql/queries';
+import { DELETE_GAME } from '../../graphql/mutations';
 import { formatDate } from '../../utils/date';
 import { DashboardGame, GamesQueryResponse, DeleteGameResponse } from '../../types/dashboard';
 import { darkTheme, lightTheme } from '../../utils/theme';

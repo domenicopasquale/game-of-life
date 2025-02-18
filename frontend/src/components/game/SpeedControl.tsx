@@ -1,4 +1,4 @@
-import { formatSpeed, getSpeedColor, SPEED_VALUES, SpeedValue } from '../../../utils/speed';
+import { formatSpeed, getSpeedColor, SPEED_VALUES, SpeedValue } from '../../utils/speed';
 import { BoltIcon } from '@heroicons/react/24/solid';
 
 interface SpeedControlProps {

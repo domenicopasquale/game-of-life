@@ -14,6 +14,13 @@ module Mutations
       rows = file_content.strip.split("\n").map(&:strip)
       size = rows.length
 
+      if rows.length > 50 || rows[0].length > 50
+        return {
+          game: nil,
+          errors: ["Grid size cannot exceed 50x50"]
+        }
+      end
+
       # Validazione: controlla che tutte le righe abbiano la stessa lunghezza
       unless rows.all? { |row| row.length == size }
         return {

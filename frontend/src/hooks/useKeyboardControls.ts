@@ -1,25 +1,38 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface KeyboardControlsProps {
-  onSpace?: () => void;
-  onRight?: () => void;
+  onSpace: () => void;
+  onRight: () => void;
 }
 
-export const useKeyboardControls = (props: KeyboardControlsProps): void => {
-  const { onSpace, onRight } = props;
+export const useKeyboardControls = ({ onSpace, onRight }: KeyboardControlsProps) => {
+  const keyPressed = useRef<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && onSpace) {
-        e.preventDefault();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (keyPressed.current[event.code]) return; // Skip if key is already pressed
+      
+      if (event.code === 'Space') {
+        event.preventDefault();
+        keyPressed.current[event.code] = true;
         onSpace();
-      } else if (e.code === 'ArrowRight' && onRight) {
-        e.preventDefault();
+      } else if (event.code === 'ArrowRight') {
+        event.preventDefault();
+        keyPressed.current[event.code] = true;
         onRight();
       }
     };
 
+    const handleKeyUp = (event: KeyboardEvent) => {
+      keyPressed.current[event.code] = false;
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, [onSpace, onRight]);
 }; 

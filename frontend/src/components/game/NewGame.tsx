@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BoltIcon } from '@heroicons/react/24/solid';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useConfig } from '../../hooks/useConfig';
 import { SPEEDS, formatSpeed, SPEED_VALUES, getSpeedColor, SpeedValue } from '../../utils/speed';
+import { useMutation } from '@apollo/client';
+import { CREATE_GAME } from '../../graphql/mutations';
+import { BoltIcon } from '@heroicons/react/24/solid';
 
 interface NewGameFormData {
   name: string;
@@ -12,11 +13,19 @@ interface NewGameFormData {
   speed: number;
 }
 
+interface CreateGameResponse {
+  createGame: {
+    id: string;
+    name: string;
+    width: number;
+    height: number;
+    speed: number;
+  };
+}
+
 const NewGame: React.FC = () => {
   const navigate = useNavigate();
   const { isDark } = useTheme();
-  const { API_URL } = useConfig();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [formData, setFormData] = useState<NewGameFormData>({
     name: '',
@@ -25,55 +34,27 @@ const NewGame: React.FC = () => {
     speed: SPEEDS.SPEED_1X
   });
 
+  const [createGame] = useMutation<CreateGameResponse>(CREATE_GAME, {
+    onCompleted: (data) => {
+      navigate('/game', { state: data.createGame });
+    }
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          query: `
-            mutation CreateGame($name: String!, $width: Int!, $height: Int!, $speed: Int!) {
-              createGame(input: {
-                name: $name
-                width: $width
-                height: $height
-                speed: $speed
-              }) {
-                id
-                name
-                width
-                height
-                speed
-              }
-            }
-          `,
-          variables: {
-            name: formData.name,
-            width: parseInt(String(formData.width)),
-            height: parseInt(String(formData.height)),
-            speed: parseInt(String(formData.speed))
-          }
-        }),
+      await createGame({
+        variables: {
+          name: formData.name,
+          width: parseInt(String(formData.width)),
+          height: parseInt(String(formData.height)),
+          speed: parseInt(String(formData.speed))
+        }
       });
-
-      const data = await response.json();
-
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      navigate('/game', { state: data.data.createGame });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create game');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -85,7 +66,7 @@ const NewGame: React.FC = () => {
     }));
   };
 
-  const handleSpeedChange = (newSpeed: number) => {
+  const handleSpeedChange = (newSpeed: SpeedValue) => {
     setFormData(prev => ({
       ...prev,
       speed: newSpeed
@@ -139,7 +120,7 @@ const NewGame: React.FC = () => {
                   onChange={handleChange}
                   placeholder="Width"
                   min="10"
-                  max="100"
+                  max="50"
                   required
                   className={`mt-1 block w-full rounded-md shadow-sm px-3 py-2 
                     ${isDark 
@@ -161,7 +142,7 @@ const NewGame: React.FC = () => {
                   onChange={handleChange}
                   placeholder="Height"
                   min="10"
-                  max="100"
+                  max="50"
                   required
                   className={`mt-1 block w-full rounded-md shadow-sm px-3 py-2 
                     ${isDark 
@@ -210,14 +191,10 @@ const NewGame: React.FC = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading}
                 className={`px-4 py-2 rounded-lg font-medium text-white
-                  ${loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-primary-600 hover:bg-primary-700 transition-colors duration-200'
-                  }`}
+                  bg-primary-600 hover:bg-primary-700 transition-colors duration-200`}
               >
-                {loading ? 'Creating...' : 'Create Game'}
+                Create Game
               </button>
             </div>
           </form>
@@ -227,4 +204,4 @@ const NewGame: React.FC = () => {
   );
 };
 
-export default NewGame; 
+export default NewGame;

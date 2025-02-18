@@ -1,12 +1,21 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import { IMPORT_GAME } from '../../mutations/ImportGame';
+import { IMPORT_GAME } from '../../graphql/mutations';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Game } from '../../types/game';
 
-interface ImportResponse {
-  importGame: Game;
+interface ImportGameResponse {
+  importGame: {
+    game: {
+      id: string;
+      name: string;
+      width: number;
+      height: number;
+      speed: number;
+      initial_state: boolean[][];
+    } | null;
+    errors?: string[];
+  };
 }
 
 const ImportGame: React.FC = () => {
@@ -16,21 +25,13 @@ const ImportGame: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  const [importGame] = useMutation<ImportResponse>(IMPORT_GAME, {
+  const [importGame] = useMutation<ImportGameResponse>(IMPORT_GAME, {
     onCompleted: (data) => {
-      console.log("Import completed, received data:", data);
       if (data.importGame.game) {
-        console.log("Game config:", {
-          id: data.importGame.game.id,
-          name: data.importGame.game.name,
-          width: data.importGame.game.width,
-          height: data.importGame.game.height,
-          initial_state: data.importGame.game.initial_state
-        });
         navigate('/game', { 
           state: data.importGame.game 
         });
-      } else if (data.importGame.errors?.length > 0) {
+      } else if (data.importGame.errors && data.importGame.errors.length > 0) {
         setError(data.importGame.errors[0]);
         setLoading(false);
       }
@@ -82,12 +83,10 @@ const ImportGame: React.FC = () => {
         throw new Error('Invalid characters in file. Only . and * are allowed');
       }
 
-      console.log("File content being sent:", text);
-
       await importGame({
         variables: {
           name: file.name.replace(/\.(txt|csv)$/, ''),
-          file_content: text
+          fileContent: text
         }
       });
     } catch (err) {
@@ -99,7 +98,9 @@ const ImportGame: React.FC = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    processFile(file);
+    if (file) {
+      processFile(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {

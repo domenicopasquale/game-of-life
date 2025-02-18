@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@apollo/client';
-import { SIGN_IN_USER } from '../../mutations/SignInUser';
+import { SIGN_IN_USER } from '../../graphql/mutations';
 import { useTheme } from '../../contexts/ThemeContext';
 import { darkTheme, lightTheme } from '../../utils/theme';
 import { motion } from 'framer-motion';

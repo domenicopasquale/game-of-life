@@ -26,7 +26,11 @@ const Navbar: React.FC = () => {
               to="/login"
               className={`text-lg sm:text-xl font-bold transition-colors ${theme.text.primary}`}
             >
-              Game of Life
+              <img 
+                src={isDark ? "/game-of-life.svg" : "/game-of-life-light.svg"}
+                alt="Game of Life" 
+                className="h-8 w-auto"
+              />
             </Link>
             
             <button
@@ -50,7 +54,11 @@ const Navbar: React.FC = () => {
             to="/dashboard"
             className={`text-lg sm:text-xl font-bold transition-colors ${theme.text.primary}`}
           >
-            Game of Life
+            <img 
+              src={isDark ? "/game-of-life.svg" : "/game-of-life-light.svg"}
+              alt="Game of Life" 
+              className="h-8 w-auto"
+            />
           </Link>
           
           <div className="flex items-center space-x-4">

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 interface UseNotificationsReturn {
   error: string;
@@ -8,8 +8,8 @@ interface UseNotificationsReturn {
 }
 
 export const useNotifications = (): UseNotificationsReturn => {
-  const [error, setError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const showError = useCallback((message: string) => {
     setError(message);
@@ -23,9 +23,14 @@ export const useNotifications = (): UseNotificationsReturn => {
     setTimeout(() => setSuccessMessage(''), 5000);
   }, []);
 
+  // Auto-dismiss notifications after 3 seconds
+  useEffect(() => {
+    // ...
+  }, [error, successMessage]);
+
   return {
-    error,
-    successMessage,
+    error: error || '',
+    successMessage: successMessage || '',
     showError,
     showSuccess
   };

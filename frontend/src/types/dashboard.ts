@@ -1,6 +1,12 @@
 import { Game } from './game';
 
-export interface DashboardGame extends Game {
+export interface DashboardGame {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  speed: number;
+  initial_state: boolean[][];
   createdAt: string;
   updatedAt: string;
 }

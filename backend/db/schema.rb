@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_02_12_170904) do
+ActiveRecord::Schema[7.1].define(version: 2025_02_12_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -24,6 +24,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_02_12_170904) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "generations_count", default: 0
+    t.integer "max_alive_cells", default: 0
+    t.integer "total_runtime", default: 0
+    t.datetime "last_played_at"
+    t.jsonb "history", default: []
+    t.jsonb "settings", default: {"zoom"=>1.0, "pan_x"=>0, "pan_y"=>0, "theme"=>"light", "cell_color"=>"#333333"}
     t.index ["user_id", "created_at"], name: "index_games_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_games_on_user_id"
   end

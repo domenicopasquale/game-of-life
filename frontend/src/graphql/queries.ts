@@ -13,4 +13,17 @@ export const GET_GAMES = gql`
       updatedAt
     }
   }
+`;
+
+export const GET_GAME = gql`
+  query GetGame($id: ID!) {
+    game(id: $id) {
+      id
+      name
+      width
+      height
+      speed
+      initial_state
+    }
+  }
 `; 
