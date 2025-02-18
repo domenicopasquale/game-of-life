@@ -7,10 +7,13 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins 'http://localhost:5173'
+    # In development accetta localhost, in production usa FRONTEND_URL
+    origins ENV['FRONTEND_URL'] || 'http://localhost:5173'
+    
     resource '/graphql',
       headers: :any,
       methods: [:post, :options],
-      credentials: true
+      credentials: true,
+      expose: ['Authorization']
   end
 end
