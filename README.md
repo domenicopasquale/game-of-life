@@ -3,7 +3,7 @@
 Un'implementazione moderna del famoso "Game of Life" di Conway, realizzata con:
 
 - Backend: Ruby on Rails + GraphQL
-- Frontend: React
+- Frontend: React + TypeScript
 
 ## 🎮 Il Gioco
 
@@ -21,7 +21,7 @@ Il Game of Life è un automa cellulare che simula l'evoluzione di una griglia di
 - **Frontend**
   - React
   - Apollo Client (per GraphQL)
-  - Styled Components
+  - Tailwind CSS
 
 ## 🚀 Funzionalità
 
@@ -34,12 +34,13 @@ Il Game of Life è un automa cellulare che simula l'evoluzione di una griglia di
 ## 📁 Struttura del Progetto
 
 - `/backend` - API Ruby on Rails con GraphQL
-- `/frontend` - Applicazione React
+- `/frontend` - Applicazione React + TypeScript
 
 ## 🌐 Utilizzo
 
 1. Registra un nuovo account o accedi
-2. Carica un file di configurazione iniziale
-3. Premi "Start" per avviare la simulazione
-4. Osserva l'evoluzione delle cellule
-5. Usa i controlli per gestire la simulazione
+2. Carica un file di configurazione iniziale o crea un nuovo gioco con configurazione personalizzata
+3. Scegli un pattern se la griglia è vuota o crea un nuovo pattern
+4. Premi "Start" per avviare la simulazione
+5. Osserva l'evoluzione delle cellule
+6. Usa i controlli per gestire la simulazione

@@ -1,24 +1,50 @@
-# README
+# Game of Life - Backend
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Backend Ruby on Rails con GraphQL per il Game of Life.
 
-Things you may want to cover:
+### 🛠 Installazione
 
-* Ruby version
+# Installa le gemme
 
-* System dependencies
+```bash
+bundle install
+```
 
-* Configuration
+# Genera due chiavi diverse
 
-* Database creation
+```bash
+rails secret
 
-* Database initialization
+rails secret
+```
 
-* How to run the test suite
+# Crea un file .env nella root del backend con le chiavi generate:
 
-* Services (job queues, cache servers, search engines, etc.)
+```bash
+FRONTEND_URL=http://localhost:5173
+JWT_SECRET_KEY=prima_chiave_generata
+SECRET_KEY_BASE=seconda_chiave_generata
+RAILS_MAX_THREADS=5
+JWT_EXPIRATION=24
+```
 
-* Deployment instructions
+# Crea e migra il database
 
-* ...
+```bash
+rails db:create
+rails db:migrate
+```
+
+### 🚀 Avvia il server
+
+```bash
+rails s -p 3001
+```
+
+Il server sarà disponibile all'indirizzo: `http://localhost:3001`
+
+### ⚠️ Sicurezza
+
+- File `.env` non deve essere committato
+- Usa chiavi diverse in produzione
+- Proteggi le chiavi segrete generate
