@@ -7,7 +7,7 @@ const httpLink = new HttpLink({
   uri: import.meta.env.VITE_GRAPHQL_URL,
   credentials: 'include',
   fetchOptions: {
-    timeout: 15000 // aumentiamo il timeout a 15 secondi
+    timeout: 15000
   }
 });
 
@@ -24,7 +24,6 @@ const debugLink = onError(({ graphQLErrors, networkError, operation }) => {
   
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);
-    // Aggiungiamo più dettagli sull'errore di rete
     console.error('Network error details:', {
       name: networkError.name,
       message: networkError.message,
@@ -33,7 +32,6 @@ const debugLink = onError(({ graphQLErrors, networkError, operation }) => {
   }
 });
 
-// Aggiungiamo un link per il timing delle operazioni
 const timingLink = new ApolloLink((operation, forward) => {
   const startTime = Date.now();
   return forward(operation).map(result => {
@@ -54,7 +52,6 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
-// Aggiungiamo un retry link per gestire i fallimenti di rete
 const retryLink = new RetryLink({
   delay: {
     initial: 300,
@@ -102,7 +99,6 @@ export const client = new ApolloClient({
   },
 });
 
-// Aggiungiamo un listener globale per gli errori non catturati
 window.addEventListener('unhandledrejection', event => {
   console.error('Unhandled promise rejection:', event.reason);
 }); 

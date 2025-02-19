@@ -35,6 +35,7 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
   const navigate = useNavigate();
   const { error, successMessage, showSuccess, showError } = useNotifications();
   const { cellSize, setCellSize } = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [isRunning, setIsRunning] = useState(false);
   const [speed, setSpeed] = useState<SpeedValue>(() => {
@@ -65,7 +66,7 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
   const [generation, setGeneration] = useState(0);
   const [selectedPattern, setSelectedPattern] = useState<string | null>(null);
 
-  const { zoomIn, zoomOut } = useZoom(cellSize, 10, 50);
+  const { zoomIn, zoomOut } = useZoom(cellSize, 5, 50);
 
   const [showTutorial, setShowTutorial] = useState(() => {
     const tutorialSeen = localStorage.getItem('tutorial_seen');
@@ -77,6 +78,27 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
       navigate('/dashboard');
     }
   }, [gameConfig, navigate]);
+
+  // Calculate initial zoom to show the entire grid
+  useEffect(() => {
+    if (containerRef.current) {
+      const container = containerRef.current;
+      const containerWidth = container.clientWidth - 32; // 32px for padding
+      const containerHeight = container.clientHeight - 32;
+      
+      // Calculate optimal cellSize for both dimensions
+      const horizontalCellSize = Math.floor(containerWidth / gameConfig.width);
+      const verticalCellSize = Math.floor(containerHeight / gameConfig.height);
+      
+      // Use the smaller value to ensure the grid is fully visible
+      const optimalCellSize = Math.min(horizontalCellSize, verticalCellSize);
+      
+      // Limit cellSize between 5 and 50
+      const boundedCellSize = Math.max(5, Math.min(50, optimalCellSize));
+      
+      setCellSize(boundedCellSize);
+    }
+  }, [gameConfig.width, gameConfig.height, setCellSize]);
 
   const countNeighbors = (grid: boolean[][], x: number, y: number): number => {
     let count = 0;
@@ -92,7 +114,6 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
   };
 
   const nextGeneration = useCallback(() => {
-    // Simplified version that ensures a single call
     const newCells = cells.map((row, i) => 
       row.map((cell, j) => {
         const neighbors = countNeighbors(cells, i, j);
@@ -193,7 +214,7 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
         }
       });
     } catch (err) {
-      // Gli errori sono già gestiti in onError
+      // Errors are already handled in onError
     }
   };
 
@@ -234,16 +255,12 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
       {/* Game controls navbar */}
       <div className={`flex-none sticky top-0 z-50 ${isDark ? 'bg-gray-900' : 'bg-white'} border-b ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            {/* Game controls */}
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+            {/* First row - main controls and stats */}
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <ControlButton
                 onClick={toggleRunning}
-                className={`p-2 rounded-lg ${
-                  isDark 
-                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' 
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
+                className={`p-2 rounded-lg ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-200' : 'bg-gray-100 hover:bg-gray-200'}`}
                 title={isRunning ? 'Stop (Space)' : 'Play (Space)'}
               >
                 {isRunning ? <StopIcon className="w-5 h-5" /> : <PlayIcon className="w-5 h-5" />}
@@ -272,23 +289,23 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
                 isDark={isDark}
               />
 
-              <PatternSelector
-                onSelect={handlePatternSelect}
-                selectedPattern={selectedPattern}
-                onPatternSelect={setSelectedPattern}
-                isDark={isDark}
-              />
-            </div>
-
-            {/* Stats and secondary controls */}
-            <div className="flex items-center gap-4">
               <GridStats
                 generation={generation}
                 population={population}
                 isDark={isDark}
               />
-              
-              <div className="flex items-center gap-2">
+            </div>
+
+            {/* Second row - secondary controls */}
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-4 w-full justify-between sm:justify-end">
+                <PatternSelector
+                  onSelect={handlePatternSelect}
+                  selectedPattern={selectedPattern}
+                  onPatternSelect={setSelectedPattern}
+                  isDark={isDark}
+                />
+                
                 <ZoomControls
                   onZoomIn={() => setCellSize(zoomIn())}
                   onZoomOut={() => setCellSize(zoomOut())}
@@ -325,14 +342,23 @@ const Grid: React.FC<GridProps> = ({ gameConfig, isDark }) => {
       </div>
 
       {/* Main grid */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" ref={containerRef}>
         <div className="min-h-full p-4 pb-20">
           <motion.div 
-            className="h-full flex items-center justify-center"
+            className="h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
             animate={{ 
               backgroundColor: isDark ? '#111827' : '#F9FAFB'
             }}
             transition={{ duration: 0.2 }}
+            drag
+            dragConstraints={{
+              top: -200,
+              left: -200,
+              right: 200,
+              bottom: 200
+            }}
+            dragElastic={0.1}
+            dragMomentum={false}
           >
             <div 
               className="relative"

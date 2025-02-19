@@ -1,17 +1,18 @@
 import { useCallback } from 'react';
 
-interface UseZoomReturn {
-  zoomIn: () => number;
-  zoomOut: () => number;
-}
-
-// Returns zoom in/out functions with min/max limits
-export const useZoom = (initialValue: number, min: number, max: number): UseZoomReturn => {
-  // Zoom in by 5 pixels, but not more than max
-  const zoomIn = useCallback(() => Math.min(initialValue + 5, max), [initialValue, max]);
+export const useZoom = (currentSize: number, minSize: number = 5, maxSize: number = 50) => {
+  // Smaller step for more gradual zoom
+  const zoomStep = 2;
   
-  // Zoom out by 5 pixels, but not less than min
-  const zoomOut = useCallback(() => Math.max(initialValue - 5, min), [initialValue, min]);
+  const zoomIn = useCallback(() => {
+    if (currentSize >= maxSize) return currentSize;
+    return Math.min(currentSize + zoomStep, maxSize);
+  }, [currentSize, maxSize]);
+
+  const zoomOut = useCallback(() => {
+    if (currentSize <= minSize) return currentSize;
+    return Math.max(currentSize - zoomStep, minSize);
+  }, [currentSize, minSize]);
 
   return { zoomIn, zoomOut };
 }; 

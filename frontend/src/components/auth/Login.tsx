@@ -21,17 +21,10 @@ const Login: React.FC = () => {
     onCompleted: async (data) => {
       try {
         localStorage.setItem('token', data.signInUser.token);
-        
-        // Impostiamo un flag per evitare doppi reindirizzamenti
         setIsRedirecting(true);
         
-        // Resettiamo lo store Apollo prima di navigare
         await client.clearStore();
-        
-        // Aggiungiamo un piccolo delay per assicurarci che lo store sia resettato
-        setTimeout(() => {
-          navigate('/dashboard', { replace: true });
-        }, 100);
+        navigate('/dashboard', { replace: true });
       } catch (err) {
         console.error('Error in login completion:', err);
         setError('Error during login process');
@@ -45,7 +38,6 @@ const Login: React.FC = () => {
     }
   });
 
-  // Preveniamo la navigazione se c'è già un reindirizzamento in corso
   if (isRedirecting) {
     return <Spinner fullScreen message="Accessing your account..." />;
   }

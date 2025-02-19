@@ -13,6 +13,7 @@ import { formatDate } from '../../utils/date';
 import { DashboardGame, GamesQueryResponse, DeleteGameResponse } from '../../types/dashboard';
 import { darkTheme, lightTheme } from '../../utils/theme';
 import { motion } from 'framer-motion';
+import Spinner from '../common/Spinner';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Dashboard: React.FC = () => {
   if (loading && !data?.games) {
     return (
       <div className={`min-h-screen ${theme.background.primary} p-4`}>
-        <div className="text-center">Loading...</div>
+        <Spinner fullScreen />
       </div>
     );
   }
@@ -124,7 +125,7 @@ const Dashboard: React.FC = () => {
 
           {loading && !data?.games && (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+              <Spinner size="md" />
             </div>
           )}
 
@@ -165,8 +166,13 @@ const Dashboard: React.FC = () => {
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => handleDelete(game.id, e)}
                       className={`p-2 rounded-full ${theme.button.ghost}`}
+                      disabled={isDeleting === game.id}
                     >
-                      <TrashIcon className="h-5 w-5" />
+                      {isDeleting === game.id ? (
+                        <Spinner size="sm" />
+                      ) : (
+                        <TrashIcon className="h-5 w-5" />
+                      )}
                     </motion.button>
                   </div>
                   <div className={`mt-3 space-y-1 ${theme.text.secondary}`}>

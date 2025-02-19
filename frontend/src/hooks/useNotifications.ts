@@ -25,7 +25,14 @@ export const useNotifications = (): UseNotificationsReturn => {
 
   // Auto-dismiss notifications after 3 seconds
   useEffect(() => {
-    // ...
+    if (error || successMessage) {
+      const timer = setTimeout(() => {
+        if (error) setError('');
+        if (successMessage) setSuccessMessage('');
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
   }, [error, successMessage]);
 
   return {

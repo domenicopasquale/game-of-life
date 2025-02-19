@@ -1,7 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
-import { darkTheme, lightTheme } from '../../utils/theme';
 import Spinner from '../common/Spinner';
 
 interface Props {
@@ -10,8 +8,6 @@ interface Props {
 
 const ProtectedRoute: React.FC<Props> = ({ children }) => {
   const location = useLocation();
-  const { isDark } = useTheme();
-  const theme = isDark ? darkTheme : lightTheme;
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -25,7 +21,6 @@ const ProtectedRoute: React.FC<Props> = ({ children }) => {
           return;
         }
 
-        // Qui potresti aggiungere una chiamata per verificare il token se necessario
         setIsAuthenticated(true);
       } catch (error) {
         console.error('Auth check error:', error);

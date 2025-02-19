@@ -46,7 +46,7 @@ const ImportGame: React.FC = () => {
   const processFile = async (file: File) => {
     if (!file) return;
 
-    // Validazione estensione file
+    // File extension validation
     const validExtensions = ['.txt', '.csv'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     if (!validExtensions.includes(fileExtension)) {
@@ -60,21 +60,21 @@ const ImportGame: React.FC = () => {
     try {
       const text = await file.text();
       
-      // Validazione contenuto
+      // Content validation
       const rows = text.trim().split('\n').map(row => row.trim());
       
-      // Verifica che il file non sia vuoto
+      // Check if the file is empty
       if (rows.length === 0) {
         throw new Error('File is empty');
       }
 
-      // Verifica che tutte le righe abbiano la stessa lunghezza
+      // Check if all rows have the same length
       const firstRowLength = rows[0].length;
       if (!rows.every(row => row.length === firstRowLength)) {
         throw new Error('All rows must have the same length');
       }
 
-      // Verifica che ci siano solo caratteri validi (. e *)
+      // Check if the file contains only valid characters (. and *)
       const validContent = rows.every(row => 
         row.split('').every(char => char === '.' || char === '*')
       );
