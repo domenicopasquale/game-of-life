@@ -86,10 +86,7 @@ const Dashboard: React.FC = () => {
       </h1>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className={`text-2xl font-bold ${theme.text.primary}`}>
-              My Games
-            </h1>
+          <div className="flex justify-end items-center mb-8">
             <div className="flex gap-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
